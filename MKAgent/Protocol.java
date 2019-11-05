@@ -109,7 +109,7 @@ public class Protocol
     	if (msg.charAt(msg.length()-1) != '\n')
     		throw new InvalidMessageException("Message not terminated with 0x0A character.");
 
-    	String[] msgParts = msg.split(";", 4);
+   	String[] msgParts = msg.split(";", 4);
     	if (msgParts.length != 4)
     		throw new InvalidMessageException("Missing arguments.");
 
