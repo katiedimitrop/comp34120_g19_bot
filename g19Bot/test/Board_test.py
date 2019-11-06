@@ -17,3 +17,9 @@ class TestBoard(unittest.TestCase):
         sideSouthBoard.setAgentSide("SOUTH")
         self.assertEqual(sideSouthBoard.getAgentSide(), "SOUTH")
 
+    def testSetState(self):
+        testStateBoard = Board(7, 7)
+        inputState = [[0, 0, 9, 9, 9, 9, 9, 2], [1, 9, 8, 8, 8, 8, 8, 1]]
+        testStateBoard.setBoard(inputState)
+        self.assertTrue(testStateBoard.getBoard, inputState)   
+

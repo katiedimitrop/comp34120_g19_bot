@@ -35,3 +35,10 @@ class TestMessage(unittest.TestCase):
         self.assertEquals(isPlayerNorth("START;NORTH\n"), True)
         self.assertEquals(isPlayerNorth("START;SOUTH\n"), False)
 
+    def testStateChange(self):
+        expected_outpiut = [[0,0,9,9,9,9,9,2],[1,9,8,8,8,8,8,1]]
+        self.assertEquals(parseStateChange("CHANGE;2;0,0,9,9,9,9,9,2,1,9,8,8,8,8,8,1;YOU", 7), expected_outpiut)
+
+    def testGetTurn(self):
+        self.assertEquals(getTurn("CHANGE;2;0,0,9,9,9,9,9,2,1,9,8,8,8,8,8,1;YOU"), "YOU")
+
