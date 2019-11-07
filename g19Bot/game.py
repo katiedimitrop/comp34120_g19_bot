@@ -1,13 +1,24 @@
 import message as msg
 import sys
-from Board import * 
+from Board import *
 
 def makeSwap():
     board.swapSide()
 
 def makeMove():
-    f.write("MOVE;3\n")
-    msg.moveMsg(3)
+    seedNum = 0
+    pitIndex = 0
+    f.write("Searching for best move \n")
+    #Strategy: find next pit where pitNum > 0
+    while (seedNum == 0):
+        seedNum = board.getSeeds(board.agentSide,pitIndex)
+        #debug statements
+        #f.write("Current pit index "+str(pitIndex)+"\n")
+        #f.write("Current seed number "+str(seedNum)+"\n")
+        pitIndex+=1
+    f.write("MOVE;"+str(pitIndex)+"\n")
+    msg.moveMsg(pitIndex)
+
 
 def changeProtocol(line):
     boardState = msg.parseStateChange(line, board.getHoles())
@@ -17,7 +28,7 @@ def changeProtocol(line):
         makeSwap()
     if(msg.getTurn(line) == "YOU\n"):
         makeMove()
-        
+
 def startProtocol(line):
     if(msg.isPlayerNorth(line) == True):
         board.setAgentSide("NORTH")
@@ -32,8 +43,8 @@ def messageAction(line, msgType):
         startProtocol(line)
     if(msgType == "CHANGE"):
         changeProtocol(line)
-    
-    
+
+
 
 def run_game():
   try:
@@ -57,6 +68,7 @@ def run_game():
 
 
 board = Board(7,7)
-swap_possible = False  
-f = open('ERROR.txt','w')
+swap_possible = False
+f = open('LOG.txt','w')
 run_game()
+f.close()

@@ -11,10 +11,11 @@ class Board:
             self.agentSide = 1
         else:
             self.agentSide = 0
-    
+
     def toString(self):
         print(self.board)
 
+    #This is the number of holes per player (excluding scorepit)
     def getHoles(self):
         return self.holes
 
@@ -38,4 +39,3 @@ class Board:
             return "NORTH"
         else:
             return "SOUTH"
-    
