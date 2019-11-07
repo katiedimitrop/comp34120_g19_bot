@@ -19,7 +19,7 @@ def swapMsg():
 
 def isPlayerNorth(line):
     words = line.split(";")
-    if(words[1] == "NORTH\n"):
+    if(words[1] == "North\n"):
         return True
     return False
 

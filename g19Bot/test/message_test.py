@@ -16,7 +16,7 @@ def captured_output():
 
 class TestMessage(unittest.TestCase):
     def testGetMsg(self):
-        self.assertEquals(getMsgType("START;NORTH"), "START")
+        self.assertEquals(getMsgType("START;North"), "START")
         self.assertEquals(getMsgType("END;"), "END")
 
     def testMoveMsg(self):
@@ -32,8 +32,8 @@ class TestMessage(unittest.TestCase):
         self.assertEqual(output, "SWAP")
 
     def testIsPlayerNorth(self):
-        self.assertEquals(isPlayerNorth("START;NORTH\n"), True)
-        self.assertEquals(isPlayerNorth("START;SOUTH\n"), False)
+        self.assertEquals(isPlayerNorth("START;North\n"), True)
+        self.assertEquals(isPlayerNorth("START;South\n"), False)
 
     def testStateChange(self):
         expected_outpiut = [[0,0,9,9,9,9,9,2],[1,9,8,8,8,8,8,1]]
