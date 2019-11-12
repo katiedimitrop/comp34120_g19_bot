@@ -7,15 +7,15 @@ def makeSwap():
 
 def makeMove():
     seedNum = 0
-    pitIndex = 1
-    bestPit = 1
+    pitIndex = 7
+    bestPit = 7
     f.write("Searching for best move \n")
     #Strategy: find next pit where pitNum > 0
-    while (pitIndex <7):
+    while (pitIndex >= 0):
         seedNum = board.getSeeds(board.agentSide,pitIndex)
         # If current pit is empty, move on to next pit
         if (seedNum == 0):
-          pitIndex+=1
+          pitIndex-=1
           #f.write("PIT EMPTY \n")
           #f.write("Current pit index "+str(pitIndex)+"\n")
           #f.write("Current seed number "+str(seedNum)+"\n")
@@ -31,7 +31,7 @@ def makeMove():
         # Move that gets a seed in final pit and some in opponents pit (second best)
         elif (seedNum + pitIndex >= 7):
           bestPit = pitIndex
-          pitIndex+=1
+          pitIndex-=1
           #f.write("SECOND BEST \n")
           #f.write("Current pit index "+str(pitIndex)+"\n")
           #f.write("Current seed number "+str(seedNum)+"\n")
@@ -41,7 +41,7 @@ def makeMove():
         # Any other viable move
         else:
           bestPit = pitIndex
-          pitIndex+=1
+          pitIndex-=1
           #f.write("VIABLE MOVE \n")
           #f.write("Current pit index "+str(pitIndex)+"\n")
           #f.write("Current seed number "+str(seedNum)+"\n")
