@@ -1,5 +1,4 @@
 import sys
-from numpy import *
 
 def getMsgType(line):
     if (line == "END\n"):
