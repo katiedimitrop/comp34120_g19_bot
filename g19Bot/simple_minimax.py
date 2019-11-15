@@ -27,7 +27,9 @@ def minimax (curDepth, nodeIndex, isMaxTurn, scores, leafDepth, branchFactor
 		#DEBUG
 		print("EVALUATING:"+str(currentBoard))
 		score = evaluateBoard(currentBoard)
-
+        #DEBUG: test MM output for NaN evaluations
+		#if nodeIndex == 0:
+			#score = np.NaN
 		#save valuation
 		scores[nodeIndex] = score
 
@@ -35,7 +37,7 @@ def minimax (curDepth, nodeIndex, isMaxTurn, scores, leafDepth, branchFactor
 		return score
 
 	if (isMaxTurn):
-		#print node description 
+		#print node description
 		playerName = "SOUTH (MAX)"
 
 		print(playerName+ " node "+ "with state:")
@@ -51,18 +53,24 @@ def minimax (curDepth, nodeIndex, isMaxTurn, scores, leafDepth, branchFactor
 			print(playerName + " CHILD NO."+str(moveIndex+1)+" MM")
 			print("Its state will be: ")
 
-			#Get board produced by this move from this node
-			nextBoard = makeNextBoard(isMaxTurn, currentBoard, moveIndex)
-			print(str(nextBoard))
+			if moveIsLegal(moveIndex,currentBoard, isMaxTurn):
+				#Get board produced by this move from this node
+				nextBoard = makeNextBoard(isMaxTurn, currentBoard, moveIndex)
+				print(str(nextBoard))
 
-			#pass board to child
-			moves[moveIndex] = minimax(curDepth + 1,
-			      nodeIndex * branchFactor + moveIndex ,False, scores, leafDepth
-			      ,branchFactor, nextBoard,moveIndex)
-			print("End MM\n")
+				#pass board to child
+				moves[moveIndex] = minimax(curDepth + 1,
+				      nodeIndex * branchFactor + moveIndex ,False, scores, leafDepth
+				      ,branchFactor, nextBoard,moveIndex)
+				print("End MM\n")
+			else:
+				#don't pass board or recurse, evaluate Node here
+				print("THAT'S ILLEGAL!")
+				moves[moveIndex] = np.NaN
 
-        #Fint max value in returned scores
-		bestValue = max(moves)
+        #isolate only non nan values and find max child value
+		nonNan = filter(lambda v: v==v, moves.copy())
+		bestValue = max(nonNan)
 
         #print the result
 		print("D"+str(curDepth)+": "+"MAX node no."+str(nodeIndex) +
@@ -71,7 +79,7 @@ def minimax (curDepth, nodeIndex, isMaxTurn, scores, leafDepth, branchFactor
 		#The end: based on the value provide a move
 		if (curDepth == 0): #first recursive call has finished
 			print("So "+playerName + " should now MOVE "
-			+str(moves.index(max(moves))+1))
+			+str(moves.index(bestValue)+1))
 
 		#return max child value to parent
 		return bestValue
@@ -93,17 +101,24 @@ def minimax (curDepth, nodeIndex, isMaxTurn, scores, leafDepth, branchFactor
 			print(playerName + " CHILD NO."+str(moveIndex+1)+" MM")
 			print("Its state will be: ")
 
-			#Get board produced by this move from this node
-			nextBoard = makeNextBoard(isMaxTurn, currentBoard, moveIndex)
-			print(str(nextBoard))
+			if moveIsLegal(moveIndex,currentBoard,isMaxTurn):
+				#Get board produced by this move from this node
+				nextBoard = makeNextBoard(isMaxTurn, currentBoard, moveIndex)
+				print(str(nextBoard))
 
-			#pass board to child
-			moves[moveIndex] = minimax(curDepth + 1,
-			 				nodeIndex * branchFactor + moveIndex, True, scores,
-							leafDepth,branchFactor, currentBoard,moveIndex)
+				#pass board to child
+				moves[moveIndex] = minimax(curDepth + 1,
+				 				nodeIndex * branchFactor + moveIndex, True, scores,
+								leafDepth,branchFactor, currentBoard,moveIndex)
+			else:
+				#don't pass board or recurse, evaluate Node here
+				print("THAT'S ILLEGAL!")
+				moves[moveIndex] = np.NaN
 
-		#find min child value
-		bestValue = min(moves)
+		#isolate only non nan values and find min child value
+		nonNan = filter(lambda v: v==v, moves.copy())
+		bestValue = min(nonNan)
+
 
         #print the result
 		print("D"+str(curDepth)+": "+"MIN node no."+str(nodeIndex) +
@@ -111,7 +126,8 @@ def minimax (curDepth, nodeIndex, isMaxTurn, scores, leafDepth, branchFactor
 
 		#The end: based on the value provide a move
 		if (curDepth == 0): #first recurive call end
-			print("So "+playerName + " should now MOVE "+str(moves.index(min(moves))+1))
+			print("So "+playerName + " should now MOVE "
+			+str(moves.index(bestValue)+1))
 
 	    #return min child value to parent
 		return bestValue
@@ -151,6 +167,11 @@ def evaluateBoard(board):
 	#south - north
 	return score
 
+def moveIsLegal(moveIndex,board,isMaxTurn):
+	if (isMaxTurn):
+		moveIndex = moveIndex + 8
+	return board[moveIndex] != 0 #true if move is legal
+
 
 
 branchFactor = 7
@@ -164,11 +185,13 @@ for col in range (0,8):
 initialBoard[7] = 0
 initialBoard[15] = 0
 
+#Illegal move 1
+initialBoard[8] = 0
 maxTreeDepth = 1
 totalNoOfLeaves = branchFactor ** maxTreeDepth
 
 #Initialize tree leave evaluation holders
-scores = [0]* totalNoOfLeaves
+scores = [np.NaN]* totalNoOfLeaves
 
 
 moveIndex = 0
