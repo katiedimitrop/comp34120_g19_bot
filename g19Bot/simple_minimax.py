@@ -109,7 +109,8 @@ def minimax (curDepth, nodeIndex, isMaxTurn, scores, leafDepth, branchFactor
 				#pass board to child
 				moves[moveIndex] = minimax(curDepth + 1,
 				 				nodeIndex * branchFactor + moveIndex, True, scores,
-								leafDepth,branchFactor, currentBoard,moveIndex)
+								leafDepth,branchFactor, nextBoard,moveIndex)
+				print("End MM\n")
 			else:
 				#don't pass board or recurse, evaluate Node here
 				print("THAT'S ILLEGAL!")
@@ -210,7 +211,7 @@ startDepth = 0
 firstIndex = 0
 
 #South is maximising player, set to 1 to run as North
-isMaxPlayer = 1
+isMaxPlayer = 0
 
 #minimax must start from top of tree (0)
 #First and only index at D0 is 0
