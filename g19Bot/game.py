@@ -1,11 +1,15 @@
 import message as msg
+import minimax as mm
 import sys
 from Board import *
+import time
+
+
 
 def makeSwap():
     board.swapSide()
 
-def makeMove():
+def makeMove(changeM):
     seedNum = 0
     pitIndex = 7
     bestPit = 7
@@ -50,7 +54,14 @@ def makeMove():
         #f.write("Current pit index "+str(pitIndex)+"\n")
         #f.write("Current seed number "+str(seedNum)+"\n")
 
+    #avoid sending START message to minimax
+    #if 'CHANGE' in changeM:
+        #uncomment to try debugging
+        #mm.run(changeM,f,board.agentSide)
+        #waiting here until result is available
+
     f.write("MOVE;"+str(bestPit)+"\n")
+
     msg.moveMsg(bestPit)
 
 
@@ -61,8 +72,8 @@ def changeProtocol(line):
     if(msg.isSwap(line)):
         makeSwap()
     if(msg.getTurn(line) == "YOU\n"):
-       #board.toString()
-        makeMove()
+        #board.toString()
+        makeMove(line)
 
 def startProtocol(line):
     if(msg.isPlayerNorth(line) == True):
@@ -70,7 +81,7 @@ def startProtocol(line):
         swap_possible = True
     else:
         board.setAgentSide("SOUTH")
-        makeMove()
+        makeMove(line)
 
 def messageAction(line, msgType):
     #print("messageAction")
@@ -89,8 +100,8 @@ def run_game():
       try:
         line = sys.stdin.readline()
       except:
-        f.write("FUCK THIS\n")
-      f.write("GOT HERE\n")
+        f.write("Problem reading engine response\n")
+      #f.write("GOT HERE\n")
       f.write(line)
       sys.stdin.flush()
       msgType = msg.getMsgType(line)
