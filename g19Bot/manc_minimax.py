@@ -72,6 +72,7 @@ def minimax (curDepth, nodeIndex, isMaxTurn, scores, leafDepth, branchFactor
 			else:
 				#don't pass board or recurse, evaluate Node here
 				log.write("THAT'S ILLEGAL!\n")
+				moves[moveIndex] = np.NaN
 				noOfIllegalMoves +=1
 
 		if noOfIllegalMoves == 7:
