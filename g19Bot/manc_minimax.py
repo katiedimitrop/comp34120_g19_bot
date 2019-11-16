@@ -7,6 +7,8 @@
 #consecutive moves. But a big tree like that  would require storing.
 
 #note: nodeindex always represents the position in the current level
+
+#note: extra turn board change is still not implemented
 import math
 import sys
 import numpy as np
@@ -49,9 +51,10 @@ def minimax (curDepth, nodeIndex, isMaxTurn, scores, leafDepth, branchFactor
 
 		#Child scores will be sent up and stored here
 		moves = [0]*branchFactor
-
+		noOfIllegalMoves = 0
 		#Run minimax on each child (next turns)
 		for moveIndex in range (0,branchFactor):
+
 			log.write("If "+ playerName + " MOVES "+str(moveIndex+1)+"\n")
 			log.write(playerName + " CHILD NO."+str(moveIndex+1)+" MM\n")
 			log.write("Its state will be: \n")
@@ -69,8 +72,11 @@ def minimax (curDepth, nodeIndex, isMaxTurn, scores, leafDepth, branchFactor
 			else:
 				#don't pass board or recurse, evaluate Node here
 				log.write("THAT'S ILLEGAL!\n")
-				moves[moveIndex] = np.NaN
+				noOfIllegalMoves +=1
 
+		if noOfIllegalMoves == 7:
+			leafDepth = curDepth +1
+			return np.NaN
         #isolate only non nan values and find max child value
 		nonNan = filter(lambda v: v==v, moves.copy())
 
@@ -102,7 +108,7 @@ def minimax (curDepth, nodeIndex, isMaxTurn, scores, leafDepth, branchFactor
 
 		#Child scores will be sent up and stored here
 		moves = [0]*branchFactor
-
+		noOfIllegalMoves = 0
 		#Run minimax on each child (next turns)
 		for moveIndex in range(0,branchFactor):
 			log.write("If "+ playerName + " MOVES "+str(moveIndex+1)+"\n")
@@ -123,7 +129,11 @@ def minimax (curDepth, nodeIndex, isMaxTurn, scores, leafDepth, branchFactor
 				#don't pass board or recurse, evaluate Node here
 				log.write("THAT'S ILLEGAL!\n")
 				moves[moveIndex] = np.NaN
+				noOfIllegalMoves +=1
 
+		if noOfIllegalMoves == 7:
+			leafDepth = curDepth +1
+			return np.NaN
 
 		#isolate only non nan values and find min child value
 		nonNan = filter(lambda v: v==v, moves.copy())
@@ -138,10 +148,11 @@ def minimax (curDepth, nodeIndex, isMaxTurn, scores, leafDepth, branchFactor
 
 		#The end: based on the value provide a move
 		if (curDepth == 0): #first recurive call end
-			log.write("So "+playerName + " should now MOVE "
-			+str(moves.index(bestValue)+1)+"\n")
-
 			bestMove = moves.index(bestValue)+1
+			log.write("So "+playerName + " should now MOVE "
+			+str(bestMove)+"\n")
+
+
 	    #return min child value to parent
 		return bestValue
 

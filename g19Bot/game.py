@@ -133,5 +133,4 @@ board = Board(7,7)
 swap_possible = False
 f = open('LOG.txt','w')
 run_game()
-manc_minimax.main()
 f.close()
