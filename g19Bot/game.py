@@ -1,5 +1,5 @@
 import message as msg
-import minimax as mm
+import manc_minimax as mm
 import sys
 from Board import *
 import time
@@ -55,9 +55,9 @@ def makeMove(changeM):
         #f.write("Current seed number "+str(seedNum)+"\n")
 
     #avoid sending START message to minimax
-    #if 'CHANGE' in changeM:
+    if 'CHANGE' in changeM:
         #uncomment to try debugging
-        #mm.run(changeM,f,board.agentSide)
+        bestPit = mm.run(changeM,f,board.agentSide)
         #waiting here until result is available
 
     f.write("MOVE;"+str(bestPit)+"\n")
@@ -108,6 +108,7 @@ def run_game():
       if (msgType == "END"):
         break
       messageAction(line, msgType)
+      time.sleep(1)
       #DEBUG: score pits
       #scoreNorth = board.getSeeds(0,0)
       #scoreSouth = board.getSeeds(1,0)
@@ -132,4 +133,5 @@ board = Board(7,7)
 swap_possible = False
 f = open('LOG.txt','w')
 run_game()
+manc_minimax.main()
 f.close()
