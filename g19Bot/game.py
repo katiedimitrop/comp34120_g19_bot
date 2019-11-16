@@ -108,7 +108,7 @@ def run_game():
       if (msgType == "END"):
         break
       messageAction(line, msgType)
-      time.sleep(1)
+      time.sleep(0)
       #DEBUG: score pits
       #scoreNorth = board.getSeeds(0,0)
       #scoreSouth = board.getSeeds(1,0)
