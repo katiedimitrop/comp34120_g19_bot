@@ -8,7 +8,6 @@
 
 #note: nodeindex always represents the position in the current level
 
-#note: extra turn board change is still not implemented
 import math
 import sys
 import numpy as np
@@ -63,11 +62,18 @@ def minimax (curDepth, nodeIndex, isMaxTurn, scores, leafDepth, branchFactor
 				#Get board produced by this move from this node
 				nextBoard = makeNextBoard(isMaxTurn, currentBoard, moveIndex)
 				log.write(str(nextBoard))
+				#by default next turn is opp's (Min's)
+				maxTurn = False
+				playerIsMax = True
+				#however there is a move that can give an extra turn
+				if givesExtraTurn(moveIndex,currentBoard, playerIsMax):
+					maxTurn = True
 
 				#pass board to child
 				moves[moveIndex] = minimax(curDepth + 1,
-				      nodeIndex * branchFactor + moveIndex ,False, scores, leafDepth
+				      nodeIndex * branchFactor + moveIndex ,maxTurn, scores, leafDepth
 				      ,branchFactor, nextBoard,moveIndex)
+
 				log.write("\nEnd MM\n")
 			else:
 				#don't pass board or recurse, evaluate Node here
@@ -121,9 +127,16 @@ def minimax (curDepth, nodeIndex, isMaxTurn, scores, leafDepth, branchFactor
 				nextBoard = makeNextBoard(isMaxTurn, currentBoard, moveIndex)
 				log.write(str(nextBoard))
 
+				#by default next turn is opp's (Max's)
+				maxTurn = True
+				playerIsMax = False
+				#however there is a move that can give an extra turn
+				if givesExtraTurn(moveIndex,currentBoard, playerIsMax):
+					maxTurn = False
+
 				#pass board to child
 				moves[moveIndex] = minimax(curDepth + 1,
-				 				nodeIndex * branchFactor + moveIndex, True, scores,
+				 				nodeIndex * branchFactor + moveIndex, maxTurn, scores,
 								leafDepth,branchFactor, nextBoard,moveIndex)
 				log.write("\nEnd MM\n")
 			else:
@@ -207,6 +220,46 @@ def makeNextBoard(fromMaxTurn, currentBoard, moveIndex):
 		resBoard[curPit+acrossIncrement] = 0
 	return resBoard
 
+def givesExtraTurn(moveIndex,currentBoard, fromMaxTurn):
+	global log
+	log.write("HELLO\n")
+	resBoard = currentBoard.copy()
+	NScorePit = 7
+	SScorePit = 15
+
+	if (fromMaxTurn): #move is being made by South(MAX)
+		movePit = moveIndex + 8
+		scorePit = 15
+		skipScoreOne = True #must skip first pit when sowing
+		skipScoreTwo = False
+
+	else:
+		movePit = moveIndex
+		scorePit = 7
+		skipScoreOne = False
+		skipScoreTwo = True
+
+	#collect the seeds, emptying the pit
+	seedStash = resBoard[movePit]
+	resBoard[movePit] = 0
+	curPit = movePit
+
+	#sow the seeds anti-clockwise
+	while seedStash > 0:
+		#find next pit index
+		if (curPit == SScorePit):
+			curPit = 0 #end of array was reached, reset
+		else:
+			curPit +=1
+
+		#if the pit index isn't opps score pit, put a seed in
+		if not((skipScoreOne and curPit == NScorePit) or
+				(skipScoreTwo and curPit == SScorePit)):
+			resBoard[curPit]+=1
+			seedStash-=1
+
+	return curPit == scorePit
+
 def evaluateBoard(board):
 	#treat pieces on a side as equivalent to being in that side's score
 	seedsOnMaxSide = sum(board[8:15])
@@ -234,7 +287,7 @@ def run_minimax(initialBoard,isMaxPlayer):
 	#initialBoard = [7,7,7,7,7,7,7,0,3,7,7,0,7,7,7,4]
 	#initialBoard = [7,7,7,7,7,7,7,0,7,7,7,7,7,7,7,0]
 
-	maxTreeDepth = 4
+	maxTreeDepth = 5
 
 	totalNoOfLeaves = branchFactor ** maxTreeDepth
 
@@ -270,7 +323,7 @@ def run_minimax(initialBoard,isMaxPlayer):
 
 	#DEBUG:
 	log.write("Leaf scores: "+ str(scores)+"\n")
-	log.write("Number of evaluations: "+str(len(scores))+"\n")
+	#log.write("Number of evaluations: "+str(len(scores))+"\n")
 	return bestMove
 
 def run(changeM,f,isPlayerSouth):
