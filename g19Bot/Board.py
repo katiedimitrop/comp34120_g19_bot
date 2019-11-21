@@ -1,10 +1,11 @@
+import numpy as np
 class Board:
     def __init__(self, holes, seeds):
         self.agentSide = 0
         self.holes = holes
-        self.board = [[seeds] * (holes + 1) for i in range(2)]
-        self.board[0][0] = 0        #North seed score pit
-        self.board[1][0] = 0        #South seed score pit
+        self.board = np.full((2, holes+1), seeds) 
+        self.board[0][holes] = 0        #North seed score pit
+        self.board[1][holes] = 0        #South seed score pit
 
     def swapSide(self):
         if(self.agentSide == 0):
@@ -35,7 +36,18 @@ class Board:
         return self.board
 
     def getAgentSide(self):
+        return self.agentSide
+    
+    def getOppSide(self):
         if(self.agentSide == 0):
-            return "NORTH"
+            return 1
         else:
-            return "SOUTH"
+            return 0
+    
+    def getBoardArray(self):
+        return self.board.ravel()
+
+    def gameOver(self):
+        x = self.board[0, :-1]
+        y = np.count_nonzero(x) == 0
+        return y

@@ -1,5 +1,5 @@
 import message as msg
-import manc_minimax as mm
+import manc_alphabeta as ab
 import sys
 from Board import *
 import time
@@ -13,7 +13,7 @@ def makeMove(changeM):
     seedNum = 0
     pitIndex = 7
     bestPit = 7
-
+    #print("GOt here")
     f.write("Searching for best move \n")
     while (pitIndex >= 1):
         seedNum = board.getSeeds(board.agentSide,pitIndex)
@@ -57,7 +57,7 @@ def makeMove(changeM):
     #avoid sending START message to minimax
     if 'CHANGE' in changeM:
         #uncomment to try debugging
-        bestPit = mm.run(changeM,f,board.agentSide)
+        bestPit = ab.run(changeM,f,board)
         #waiting here until result is available
 
     f.write("MOVE;"+str(bestPit)+"\n")
