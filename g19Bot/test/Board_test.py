@@ -10,12 +10,12 @@ class TestBoard(unittest.TestCase):
     def testSetSideNorth(self):
         sideNorthBoard = Board(2,3)
         sideNorthBoard.setAgentSide("NORTH")
-        self.assertEqual(sideNorthBoard.getAgentSide(), "NORTH")
+        self.assertEqual(sideNorthBoard.getAgentSide(), 0)
 
     def testSetSideSouth(self):
         sideSouthBoard = Board(2,3)
         sideSouthBoard.setAgentSide("SOUTH")
-        self.assertEqual(sideSouthBoard.getAgentSide(), "SOUTH")
+        self.assertEqual(sideSouthBoard.getAgentSide(), 1)
 
     def testSetState(self):
         testStateBoard = Board(7, 7)
