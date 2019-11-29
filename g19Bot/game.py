@@ -1,15 +1,26 @@
 import message as msg
 import manc_alphabeta as ab
+import manc_minimax as mm
 import sys
 from Board import *
 import time
+import argparse
 
-
+parser = argparse.ArgumentParser()
+parser.add_argument("-d", "--depth", dest = "depth", default = 5, help="Depth of Search", type=int)
+parser.add_argument("-m", "--method", dest = "method", default = "AB", help="Search Method")
+args = parser.parse_args()
+moveNumber = 0
+oppMove = 0
 
 def makeSwap():
+    global board
     board.swapSide()
 
 def makeMove(changeM):
+    global board
+    global moveNumber
+    moveNumber = moveNumber + 1
     seedNum = 0
     pitIndex = 7
     bestPit = 7
@@ -57,7 +68,10 @@ def makeMove(changeM):
     #avoid sending START message to minimax
     if 'CHANGE' in changeM:
         #uncomment to try debugging
-        bestPit = ab.run(changeM,f,board)
+        if(args.method == "AB"):
+          bestPit = ab.run_ab(changeM,f,board, args.depth)
+        else:
+          bestPit = mm.run_mm(changeM, f, board.agentSide)
         #waiting here until result is available
 
     f.write("MOVE;"+str(bestPit)+"\n")
@@ -66,6 +80,8 @@ def makeMove(changeM):
 
 
 def changeProtocol(line):
+    global oppMove
+    global board
     boardState = msg.parseStateChange(line, board.getHoles())
     board.setBoard(boardState)
 
@@ -74,6 +90,8 @@ def changeProtocol(line):
     if(msg.getTurn(line) == "YOU\n"):
         #board.toString()
         makeMove(line)
+    else: 
+      oppMove = oppMove + 1
 
 def startProtocol(line):
     if(msg.isPlayerNorth(line) == True):
@@ -133,4 +151,9 @@ board = Board(7,7)
 swap_possible = False
 f = open('LOG.txt','w')
 run_game()
+f.write("MANCALA AGENT RUN WITH DEPTH : " + str(args.depth) + " METHOD: " + str(args.method) + "\n")
+f.write("FINAL BOARD : " + str(board.getBoard()) + "\n")
+f.write("\t SCORE \t MOVES \n")
+f.write("US \t " + str(board.getAgentScore()) + " \t " + str(moveNumber) + "\n" )
+f.write("OPP \t " + str(board.getOppScore()) + " \t " + str(oppMove) + "\n" )
 f.close()

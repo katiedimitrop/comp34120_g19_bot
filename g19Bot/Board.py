@@ -2,6 +2,7 @@ import numpy as np
 class Board:
     def __init__(self, holes, seeds):
         self.agentSide = 0
+        self.oppSide = 1
         self.holes = holes
         self.board = np.full((2, holes+1), seeds) 
         self.board[0][holes] = 0        #North seed score pit
@@ -10,8 +11,10 @@ class Board:
     def swapSide(self):
         if(self.agentSide == 0):
             self.agentSide = 1
+            self.oppSide = 0
         else:
             self.agentSide = 0
+            self.oppSide = 1
 
     def toString(self):
         print(self.board)
@@ -29,8 +32,10 @@ class Board:
     def setAgentSide(self, side):
         if(side == "NORTH"):
             self.agentSide = 0
+            self.oppSide = 1
         else:
             self.agentSide = 1
+            self.oppSide = 0
 
     def getBoard(self):
         return self.board
@@ -39,10 +44,7 @@ class Board:
         return self.agentSide
     
     def getOppSide(self):
-        if(self.agentSide == 0):
-            return 1
-        else:
-            return 0
+        return self.oppSide
     
     def getBoardArray(self):
         return self.board.ravel()
@@ -51,3 +53,9 @@ class Board:
         x = self.board[0, :-1]
         y = np.count_nonzero(x) == 0
         return y
+    
+    def getOppScore(self):
+        return self.board[self.oppSide][self.holes]
+
+    def getAgentScore(self): 
+        return self.board[self.agentSide][self.holes]
