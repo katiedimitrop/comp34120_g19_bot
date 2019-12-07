@@ -13,22 +13,24 @@ import sys
 import numpy as np
 import copy
 
-MAXDEPTH = 6
+MAXDEPTH = 8
 log = open('MANCALA_OUT.txt','w')
-def alphabeta (curDepth, isMaxTurn, branchFactor, currentBoard, alpha, beta):
+def alphabeta (curDepth, isMaximizingPlayer, branchFactor, currentBoard, alpha, beta):
 	#global ##log
 	global MAXDEPTH
 	
 	value = 0
-	#log.write("\nD"+str(curDepth)+": ")
+	log.write("\nD"+str(curDepth)+": ")
 
 	# base case : leafDepth (max depth) reached or Game Over 
 	if (curDepth == MAXDEPTH-2) or (currentBoard.gameOver()):
 		#log.write("EVALUATING:"+str(currentBoard.getBoardArray()) + "\n")
 		value = evaluateBoard(currentBoard)
+		log.write("SKA : VALUE " + str(value) + "\n")
+		log.write("SKA : BOARD " + str(currentBoard.getBoardArray()) + "\n\n")
 
 	#If player turn: set find max value and set alpha
-	elif (isMaxTurn):
+	elif (isMaximizingPlayer):
 		value = -9999
 		prune = False
 		playerName = "(OUR PLAYER) MAX"
@@ -40,29 +42,35 @@ def alphabeta (curDepth, isMaxTurn, branchFactor, currentBoard, alpha, beta):
 		#Run alphabeta on each child (next turns)
 		for moveIndex in range (0,branchFactor):
 			if not prune:
-				#log.write("If "+ playerName + " MOVES "+str(moveIndex + 1)+"\n")
-				#log.write(playerName + " CHILD NO."+str(moveIndex + 1)+" MM\n")
-				#log.write("Its state will be: \n")
+				log.write("If "+ playerName + " MOVES "+str(moveIndex + 1)+"\n")
+				log.write(playerName + " CHILD NO."+str(moveIndex + 1)+" MM\n")
+				log.write("Its state will be: \n")
 
-				if moveIsLegal(moveIndex,currentBoard, isMaxTurn):
+				if moveIsLegal(moveIndex,currentBoard, isMaximizingPlayer):
 					#Get board produced by this move from this node
-					nextBoard = makeNextBoard(currentBoard.getAgentSide(), copy.deepcopy(currentBoard), moveIndex)
-					#log.write(str(nextBoard.getBoardArray()) + "\n")
+					log.write("CHAOS ====================================== \n")
+					log.write("CHAOS - BEFORE " + str(currentBoard.getBoardArray()) + "\n")
+					nextBoard = copy.deepcopy(currentBoard)
+					nextArray = makeNextBoard(nextBoard.agentSide, nextBoard.getBoardArray(), moveIndex)
+					nextBoard.setBoardArray(nextArray)
+					log.write("CHAOS - EXITED" + str(nextBoard.getBoardArray()) + "\n")
+					log.write("CHAOS ====================================== \n")
+					
 					#by default next turn is opp's (Min's)
-					maxTurn = False
-					playerIsMax = True
-					#however there is a move that can give an extra turn
-					if givesExtraTurn(moveIndex,currentBoard, playerIsMax):
-						maxTurn = True
+					nextPlayerIsMax = False
+					#unless it's a move that gives an extra turn to Max
+					if givesExtraTurn(moveIndex,currentBoard, isMaximizingPlayer):
+						nextPlayerIsMax = True 
 
 					#pass board to child
-					value = max(value, alphabeta(curDepth + 1, maxTurn, branchFactor, nextBoard, alpha, beta))
+					value = max(value, alphabeta(curDepth + 1, nextPlayerIsMax, branchFactor, nextBoard, alpha, beta))
 					alpha = max(value, alpha)
 					if alpha >= beta:
-						#log.write("PRUNE\n")
+						log.write("PRUNE\n")
 						prune = True
+					return value
 				else:
-					#if not legal, set alpha really high so it isnt used and do not recurse
+					log.write("ILLEGAL\n")
 					alpha = -9999
 
 	#if not player turn: find minimum value and set beta 
@@ -77,58 +85,67 @@ def alphabeta (curDepth, isMaxTurn, branchFactor, currentBoard, alpha, beta):
 
 		for moveIndex in range (0,branchFactor):
 			if not prune:
-				#log.write("If "+ playerName + " MOVES "+str(moveIndex + 1)+"\n")
-				#log.write(playerName + " CHILD NO."+str(moveIndex +1)+" MM\n")
-				#log.write("Its state will be: ")
+				log.write("If "+ playerName + " MOVES "+str(moveIndex + 1)+"\n")
+				log.write(playerName + " CHILD NO."+str(moveIndex +1)+" MM\n")
+				log.write("Its state will be: ")
 
-				if moveIsLegal(moveIndex,currentBoard,isMaxTurn):
+				if moveIsLegal(moveIndex,currentBoard,isMaximizingPlayer):
 					#Get board produced by this move from this node
-					nextBoard = makeNextBoard(currentBoard.getOppSide(), copy.deepcopy(currentBoard), moveIndex)
-					#log.write(str(nextBoard.getBoardArray()) + "\n")
+					log.write("CHAOS ====================================== \n")
+					log.write("CHAOS - BEFORE " + str(currentBoard.getBoardArray()) + "\n")
+					nextBoard = copy.deepcopy(currentBoard)
+					nextArray = makeNextBoard(nextBoard.oppSide, nextBoard.getBoardArray(), moveIndex)
+					nextBoard.setBoardArray(nextArray)
+					log.write("CHAOS - EXITED" + str(nextBoard.getBoardArray()) + "\n")
+					log.write("CHAOS ====================================== \n")
 
-					#by default next turn is opp's (Max's)
-					maxTurn = True
-					playerIsMax = False
-					#however there is a move that can give an extra turn
-					if givesExtraTurn(moveIndex,currentBoard, playerIsMax):
-						maxTurn = False
+					#by default next turn is agents (Max's)
+					nextPlayerIsMax = True
+					#unless it's a move that gives an extra turn to Max
+					if givesExtraTurn(moveIndex,currentBoard, isMaximizingPlayer):
+						nextPlayerIsMax = False 
 
 					#pass board to child
-					value = min(value, alphabeta(curDepth + 1, maxTurn, branchFactor, nextBoard, alpha, beta))
+					value = min(value, alphabeta(curDepth + 1, nextPlayerIsMax, branchFactor, nextBoard, alpha, beta))
 					beta = min(value, beta)
 					if alpha >= beta:
 						prune = True
-						#log.write("PRUNE\n")
+						log.write("PRUNE\n")
 					return value
 				else:
 					# Move Illegal, set Beta to extremely high value
+					log.write("ILLEGAL\n")
 					beta = 9999
 	return value
 	
 
-def makeNextBoard(side, currentBoard, moveIndex):
-	resBoard = currentBoard.getBoardArray()
+def makeNextBoard(playerSide, currentBoard, moveIndex):
+	resBoard = currentBoard
+	log.write("\n -----------------------------------------------------\n")
+	log.write("CHAOS - MOVE " + str(moveIndex) + "\n")
+	log.write("CHAOS - SIDE " + str(playerSide) + "\n")
+	log.write("CHAOS - NOT MOVED " + str(resBoard) + "\n")
 	NScorePit = 7
 	SScorePit = 15
 
-	if (side == 1): #move is being made by South(MAX)
-		movePit = moveIndex + 7
+	if (playerSide == 1): #move is being made by South
+		movePit = moveIndex + 8
 		leftMostPit = 8
 		rightMostPit = 14 #excluding score pit
 		scorePit = 15
 		acrossIncrement = -8
-		skipScoreOne = True #must skip first pit when sowing
-		skipScoreTwo = False
+		skipSouth = False
+		skipNorth = True
 
-	else:
+	else:	#move is being made by North
 		movePit = moveIndex
 		leftMostPit = 0
 		rightMostPit = 6
 		scorePit = 7
 		acrossIncrement = 8
-		skipScoreOne = False
-		skipScoreTwo = True
-
+		skipSouth = True #must skip first pit when sowing
+		skipNorth = False
+		
 	#collect the seeds, emptying the pit
 	seedStash = resBoard[movePit]
 	resBoard[movePit] = 0
@@ -143,42 +160,49 @@ def makeNextBoard(side, currentBoard, moveIndex):
 			curPit +=1
 
 		#if the pit index isn't opps score pit, put a seed in
-		if not((skipScoreOne and curPit == NScorePit) or
-				(skipScoreTwo and curPit == SScorePit)):
+		if not((skipNorth and curPit == NScorePit) or
+				(skipSouth and curPit == SScorePit)):
 			resBoard[curPit]+=1
 			seedStash-=1
+		log.write("CHAOS - " + str(resBoard) + "\n")
 
 	#if player's last seed ended up in one of their empty playable pits
 	if ((resBoard[curPit] == 1) and (leftMostPit<= curPit <= rightMostPit)):
 	#take whatever is across and place it in player's score pit
 		resBoard[scorePit]+=resBoard[curPit+acrossIncrement]
+		#the scorepit across was non empty (i.e a capture occured)
+		if resBoard[curPit+acrossIncrement]!=0:
+			#also capture the capturing seed
+			resBoard[curPit]-=1
+			resBoard[scorePit]+=1
 		#empty opp's pit
 		resBoard[curPit+acrossIncrement] = 0
-	board = np.reshape(resBoard, (-1, 8))
-	currentBoard.setBoard(board)
-	return currentBoard
+	
+	log.write("CHAOS - MOVED " + str(resBoard) + "\n")
+	log.write("-----------------------------------------------------\n")
+	return resBoard
 
-def givesExtraTurn(moveIndex,currentBoard, fromMaxTurn):
+def givesExtraTurn(moveIndex, currentBoard, fromMaxNode):
 	#global #log
 	resBoard = currentBoard.getBoardArray()
 	NScorePit = 7
 	SScorePit = 15
-	if(fromMaxTurn):	
+	if(fromMaxNode):	
 		index = currentBoard.agentSide
 	else: 
 		index = currentBoard.getOppSide()
 	
-	if (index == 1): #move is being made by South(MAX)
-		movePit = moveIndex + 7
+	if (index == 1): #move is being made by South
+		movePit = moveIndex + 8
 		scorePit = 15
-		skipScoreOne = True #must skip first pit when sowing
-		skipScoreTwo = False
+		skipNorthPit = True #must skip first pit when sowing
+		skipSouthPit = False
 
-	else:
+	else: #indexing for North Side
 		movePit = moveIndex
 		scorePit = 7
-		skipScoreOne = False
-		skipScoreTwo = True
+		skipNorthPit = False
+		skipSouthPit = True
 
 	#collect the seeds, emptying the pit
 	seedStash = resBoard[movePit]
@@ -194,8 +218,8 @@ def givesExtraTurn(moveIndex,currentBoard, fromMaxTurn):
 			curPit +=1
 
 		#if the pit index isn't opps score pit, put a seed in
-		if not((skipScoreOne and curPit == NScorePit) or
-				(skipScoreTwo and curPit == SScorePit)):
+		if not((skipNorthPit and curPit == NScorePit) or
+				(skipSouthPit and curPit == SScorePit)):
 			resBoard[curPit]+=1
 			seedStash-=1
 
@@ -205,7 +229,7 @@ def givesExtraTurn(moveIndex,currentBoard, fromMaxTurn):
 def evaluateBoard(board):
 	global log
 	resBoard = board.getBoardArray()
-	log.write("SKA: BOARD " + str(resBoard) + "\n")
+	#log.write("SKA: BOARD " + str(resBoard) + "\n")
 	seedsOnSouthSide = sum(resBoard[8:15])
 	seedsOnNorthSide = sum(resBoard[0:7])
 	if (board.agentSide == 1):
@@ -214,8 +238,12 @@ def evaluateBoard(board):
 
 # moveIsLegal : True if legal, False if Illegal
 def moveIsLegal(moveIndex,board,isMaxTurn):
+	log.write("LEGAL CHECKING MOVE " + str(moveIndex) + " FOR MAX NODE " + str(isMaxTurn) + "\n")
+	log.write("LEGAL CHECKING BOARD " + str(board.getBoardArray()) + "\n")
 	if (isMaxTurn):
+		log.write("LEGAL INDEX GOT " + str(board.getSeeds(board.agentSide, moveIndex)) + "\n")
 		return board.getSeeds(board.agentSide, moveIndex) != 0
+	log.write("LEGAL INDEX GOT " + str(board.getSeeds(board.getOppSide(), moveIndex)) + "\n")
 	return board.getSeeds(board.getOppSide(), moveIndex) != 0 
 
 
@@ -226,32 +254,51 @@ def run_alphabeta(initialBoard):
 	value = alpha = -9999
 	beta = 9999
 	moveIndex = move = 0
-	prune = False
+	#prune = False
+	
 	#log.write("\n"+"STARTING ALPHABETA WITH MAX DEPTH: " + str(MAXDEPTH)+"\n")
 	#check available moves and their value
 	for moveIndex in range (0,branchFactor):
 		if moveIsLegal(moveIndex, initialBoard, True):
 			#Get board produced by this move from this node
-			nextBoard = makeNextBoard(initialBoard.getAgentSide(), copy.deepcopy(initialBoard), moveIndex)
+			log.write("\n CHAOS MASTER ====================================== \n")
+			log.write("CHAOS ====================================== \n")
+			log.write("CHAOS - BEFORE " + str(initialBoard.getBoardArray()) + "\n")
+			log.write("ORDER: INIT BOARD \n")
+			log.write(initialBoard.toString())
+			nextBoard = copy.deepcopy(initialBoard)
+			log.write("ORDER: COPY BOARD \n")
+			log.write(nextBoard.toString())
+			nextArray = makeNextBoard(nextBoard.agentSide, nextBoard.getBoardArray(), moveIndex)
+			nextBoard.setBoardArray(nextArray)
+			log.write("CHAOS - EXITED" + str(nextBoard.getBoardArray()) + "\n")
+			log.write("CHAOS ====================================== \n")
 			#by default next turn is opp's (Min's)
-			maxTurn = False
-			playerIsMax = True
+			
+			nextPlayerIsMax = False
 			#check for extra turn
-			if givesExtraTurn(moveIndex, nextBoard, playerIsMax):
-				maxTurn = True
+			if givesExtraTurn(moveIndex, copy.deepcopy(initialBoard), True):
+				nextPlayerIsMax = True
+
 			#log.write(str(nextBoard.getBoardArray()) + "\n")
-			value = max(value, alphabeta(0, True, branchFactor, nextBoard, alpha, beta))
+			value = max(value, alphabeta(0, nextPlayerIsMax, branchFactor, nextBoard, alpha, beta))
 			if alpha < value: 
 				alpha = value
 				bestMove = moveIndex
-	#log.write("\n"+"The optimal value is : " + str(value)+"\n")
-	#log.write("\n"+"The best move is : " + str(bestMove+1)+"\n")
+				bestBoard = nextBoard
+
+	log.write("======== INITIAL BOARD =========\n")
+	log.write(str(initialBoard.getBoardArray()) + "\n")
+	log.write("\n"+"The optimal value is : " + str(value)+"\n")
+	log.write("\n"+"The best move is : " + str(bestMove+1)+"\n")
+	log.write("\nThe best board is " + str(bestBoard.getBoardArray()) +"\n" )
 
 	return bestMove + 1
 
 def run_ab(changeM,f,board, depth):
 	global MAXDEPTH
 	MAXDEPTH = depth
+	log.write("MAXDEPTH " + str(MAXDEPTH) + "\n")
 	#parse the engine changeMsg in order to produce array
 	words = changeM.split(";")
 	state = words[2].split(",")

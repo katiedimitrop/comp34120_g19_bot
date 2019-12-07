@@ -37,6 +37,10 @@ class Board:
             self.agentSide = 1
             self.oppSide = 0
 
+    def setBoardArray(self, board):
+        newBoard = np.reshape(board, (-1, 8))
+        self.board = newBoard
+
     def getBoard(self):
         return self.board
 
@@ -59,3 +63,6 @@ class Board:
 
     def getAgentScore(self): 
         return self.board[self.agentSide][self.holes]
+
+    def toString(self):
+        return "AGENT SIDE " + str(self.agentSide) + "\nOPP SIDE " + str(self.oppSide) + "\nBOARD " + str(self.board) + "\n" 

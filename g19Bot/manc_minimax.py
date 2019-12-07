@@ -18,6 +18,7 @@ def minimax (curDepth, nodeIndex, isMaxTurn, scores, leafDepth, branchFactor
 			, currentBoard, moveIndex):
 	global log
 	global bestMove
+	moveIndex = 0
 	#DEBUG:this represents the depth
 	log.write("\nD"+str(curDepth)+": ")
 
@@ -94,7 +95,7 @@ def minimax (curDepth, nodeIndex, isMaxTurn, scores, leafDepth, branchFactor
 
         #print the result
 		log.write("D"+str(curDepth)+": "+"MAX node no."+str(nodeIndex) +
-			" value: "+ str(bestValue)+"\n")
+			" value: "+ str(bestValue)+ "BOARD" + str(nextBoard) + "\n")
 
 		#The end: based on the value provide a move
 		if (curDepth == 0): #first recursive call has finished
@@ -158,7 +159,7 @@ def minimax (curDepth, nodeIndex, isMaxTurn, scores, leafDepth, branchFactor
 
         #print the result
 		log.write("D"+str(curDepth)+": "+"MIN node no."+str(nodeIndex) +
-			" value: "+ str(bestValue)+"\n")
+			" value: "+ str(bestValue)+ "BOARD" + str(nextBoard) + "\n")
 
 		#The end: based on the value provide a move
 		if (curDepth == 0): #first recurive call end
@@ -172,6 +173,10 @@ def minimax (curDepth, nodeIndex, isMaxTurn, scores, leafDepth, branchFactor
 
 def makeNextBoard(fromMaxTurn, currentBoard, moveIndex):
 	resBoard = currentBoard.copy()
+	log.write("\n -----------------------------------------------------\n")
+	log.write("CHAOS - MOVE " + str(moveIndex) + "\n")
+	log.write("CHAOS - SIDE " + str(fromMaxTurn) + "\n")
+	log.write("CHAOS - NOT MOVED " + str(resBoard) + "\n")
 	NScorePit = 7
 	SScorePit = 15
 
@@ -211,6 +216,7 @@ def makeNextBoard(fromMaxTurn, currentBoard, moveIndex):
 				(skipScoreTwo and curPit == SScorePit)):
 			resBoard[curPit]+=1
 			seedStash-=1
+		log.write("CHAOS - " + str(resBoard) + "\n")
 
 	#if player's last seed ended up in one of their empty playable pits
 	if ((resBoard[curPit] == 1) and (leftMostPit<= curPit <= rightMostPit)):
@@ -218,6 +224,8 @@ def makeNextBoard(fromMaxTurn, currentBoard, moveIndex):
 		resBoard[scorePit]+=resBoard[curPit+acrossIncrement]
 		#empty opp's pit
 		resBoard[curPit+acrossIncrement] = 0
+	log.write("CHAOS - MOVED " + str(resBoard) + "\n")
+	log.write("-----------------------------------------------------\n")
 	return resBoard
 
 def givesExtraTurn(moveIndex,currentBoard, fromMaxTurn):
@@ -311,18 +319,18 @@ def run_minimax(initialBoard,isMaxPlayer):
 
 	#South is maximising player, set to 1 to run as North
 
-
+	origBoard = initialBoard
 	#minimax must start from top of tree (0)
 	#First and only index at D0 is 0
 	mmResult = minimax(startDepth, firstIndex, isMaxPlayer, scores, maxTreeDepth
 					,branchFactor, initialBoard, moveIndex)
 
 
-	log.write("\n"+"The optimal value is : " + str(mmResult)+"\n")
-	log.write("\n"+"The best move is : " + str(bestMove)+"\n")
-
+	log.write("\n"+" SKA The optimal value is : " + str(mmResult)+"\n")
+	log.write("\n"+" SKA The best move is : " + str(bestMove)+"\n")
+	testmyboard = makeNextBoard(True, origBoard, bestMove)
 	#DEBUG:
-	log.write("Leaf scores: "+ str(scores)+"\n")
+	#log.write("Leaf scores: "+ str(scores)+"\n")
 	#log.write("Number of evaluations: "+str(len(scores))+"\n")
 	return bestMove
 
