@@ -233,7 +233,7 @@ def givesExtraTurn(moveIndex, currentBoard, fromMaxNode):
 
 # evaluateBoard : works out the value of the board based on hueristic
 def evaluateBoard(board):
-	global #log
+	#global #log
 	resBoard = board.getBoardArray()
 	#log.write("SKA: BOARD " + str(resBoard) + "\n")
 	seedsOnSouthSide = sum(resBoard[8:16])
