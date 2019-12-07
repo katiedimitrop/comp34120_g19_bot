@@ -68,6 +68,7 @@ def alphabeta (curDepth, isMaximizingPlayer, branchFactor, currentBoard, alpha, 
 					if alpha >= beta:
 						log.write("PRUNE\n")
 						prune = True
+						break
 					return value
 				else:
 					log.write("ILLEGAL\n")
@@ -91,13 +92,13 @@ def alphabeta (curDepth, isMaximizingPlayer, branchFactor, currentBoard, alpha, 
 
 				if moveIsLegal(moveIndex,currentBoard,isMaximizingPlayer):
 					#Get board produced by this move from this node
-					log.write("CHAOS ====================================== \n")
-					log.write("CHAOS - BEFORE " + str(currentBoard.getBoardArray()) + "\n")
+					#log.write("CHAOS ====================================== \n")
+					#log.write("CHAOS - BEFORE " + str(currentBoard.getBoardArray()) + "\n")
 					nextBoard = copy.deepcopy(currentBoard)
 					nextArray = makeNextBoard(nextBoard.oppSide, nextBoard.getBoardArray(), moveIndex)
 					nextBoard.setBoardArray(nextArray)
-					log.write("CHAOS - EXITED" + str(nextBoard.getBoardArray()) + "\n")
-					log.write("CHAOS ====================================== \n")
+					#log.write("CHAOS - EXITED" + str(nextBoard.getBoardArray()) + "\n")
+					#log.write("CHAOS ====================================== \n")
 
 					#by default next turn is agents (Max's)
 					nextPlayerIsMax = True
@@ -111,6 +112,7 @@ def alphabeta (curDepth, isMaximizingPlayer, branchFactor, currentBoard, alpha, 
 					if alpha >= beta:
 						prune = True
 						log.write("PRUNE\n")
+						break
 					return value
 				else:
 					# Move Illegal, set Beta to extremely high value
@@ -184,6 +186,7 @@ def makeNextBoard(playerSide, currentBoard, moveIndex):
 
 def givesExtraTurn(moveIndex, currentBoard, fromMaxNode):
 	#global #log
+	log.write("EXTRA - BEFORE " + str(currentBoard.toString("EXTRA")) + "\n")
 	resBoard = currentBoard.getBoardArray()
 	NScorePit = 7
 	SScorePit = 15
@@ -223,6 +226,7 @@ def givesExtraTurn(moveIndex, currentBoard, fromMaxNode):
 			resBoard[curPit]+=1
 			seedStash-=1
 
+	log.write("EXTRA - AFTER " + str(currentBoard.toString("EXTRA")) + "\n")
 	return curPit == scorePit
 
 # evaluateBoard : works out the value of the board based on hueristic
@@ -230,8 +234,8 @@ def evaluateBoard(board):
 	global log
 	resBoard = board.getBoardArray()
 	#log.write("SKA: BOARD " + str(resBoard) + "\n")
-	seedsOnSouthSide = sum(resBoard[8:15])
-	seedsOnNorthSide = sum(resBoard[0:7])
+	seedsOnSouthSide = sum(resBoard[8:16])
+	seedsOnNorthSide = sum(resBoard[0:8])
 	if (board.agentSide == 1):
 		return seedsOnSouthSide - seedsOnNorthSide
 	return seedsOnNorthSide - seedsOnSouthSide
@@ -251,7 +255,7 @@ def moveIsLegal(moveIndex,board,isMaxTurn):
 def run_alphabeta(initialBoard):
 	#global #log
 	branchFactor = 7
-	value = alpha = -9999
+	value = alpha = maxValue = -9999
 	beta = 9999
 	moveIndex = move = 0
 	#prune = False
@@ -261,18 +265,21 @@ def run_alphabeta(initialBoard):
 	for moveIndex in range (0,branchFactor):
 		if moveIsLegal(moveIndex, initialBoard, True):
 			#Get board produced by this move from this node
-			log.write("\n CHAOS MASTER ====================================== \n")
-			log.write("CHAOS ====================================== \n")
-			log.write("CHAOS - BEFORE " + str(initialBoard.getBoardArray()) + "\n")
-			log.write("ORDER: INIT BOARD \n")
-			log.write(initialBoard.toString())
+			#log.write("\n CHAOS MASTER ====================================== \n")
+			#log.write("CHAOS ====================================== \n")
+			#log.write("CHAOS - BEFORE " + str(initialBoard.getBoardArray()) + "\n")
+			#log.write("ORDER:  MOVE " + str(moveIndex) + "\n")
+			#log.write("ORDER: INIT BOARD \n")
+			#log.write(initialBoard.toString("ORDER"))
 			nextBoard = copy.deepcopy(initialBoard)
-			log.write("ORDER: COPY BOARD \n")
-			log.write(nextBoard.toString())
+			#log.write("ORDER: COPY BOARD \n")
+			#log.write(nextBoard.toString("ORDER"))
 			nextArray = makeNextBoard(nextBoard.agentSide, nextBoard.getBoardArray(), moveIndex)
 			nextBoard.setBoardArray(nextArray)
-			log.write("CHAOS - EXITED" + str(nextBoard.getBoardArray()) + "\n")
-			log.write("CHAOS ====================================== \n")
+			#log.write("ORDER: MAKE NEXT BOARD \n")
+			#log.write(nextBoard.toString("ORDER"))
+			#log.write("CHAOS - EXITED" + str(nextBoard.getBoardArray()) + "\n")
+			#log.write("CHAOS ====================================== \n")
 			#by default next turn is opp's (Min's)
 			
 			nextPlayerIsMax = False
@@ -281,9 +288,11 @@ def run_alphabeta(initialBoard):
 				nextPlayerIsMax = True
 
 			#log.write(str(nextBoard.getBoardArray()) + "\n")
-			value = max(value, alphabeta(0, nextPlayerIsMax, branchFactor, nextBoard, alpha, beta))
-			if alpha < value: 
-				alpha = value
+			value = max(value, alphabeta(0, nextPlayerIsMax, branchFactor, copy.deepcopy(nextBoard), alpha, beta))
+			log.write("GRIMES MOVE : " + str(moveIndex) + " VALUE : " + str(value) + "\n")
+			log.write("GRIMES BOARD : " + str(nextBoard.getBoardArray()) + "\n")
+			if maxValue < value: 
+				maxValue = value
 				bestMove = moveIndex
 				bestBoard = nextBoard
 

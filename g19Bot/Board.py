@@ -64,5 +64,5 @@ class Board:
     def getAgentScore(self): 
         return self.board[self.agentSide][self.holes]
 
-    def toString(self):
-        return "AGENT SIDE " + str(self.agentSide) + "\nOPP SIDE " + str(self.oppSide) + "\nBOARD " + str(self.board) + "\n" 
+    def toString(self, grepWord):
+        return str(grepWord) + " AGENT SIDE " + str(self.agentSide) + "\n" + str(grepWord) + " OPP SIDE " + str(self.oppSide) + "\n" + str(grepWord) + " BOARD " + str(self.board) + "\n" 
