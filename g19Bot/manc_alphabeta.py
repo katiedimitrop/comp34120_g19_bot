@@ -23,11 +23,15 @@ def alphabeta (curDepth, isMaximizingPlayer, branchFactor, currentBoard, alpha, 
 	log.write("\nD"+str(curDepth)+": ")
 
 	# base case : leafDepth (max depth) reached or Game Over 
+	if (currentBoard.gameOver()):
+		log.write("\n SUCC  " + str(currentBoard.getBoardArray()) + "\n")
+
 	if (curDepth == MAXDEPTH-2) or (currentBoard.gameOver()):
 		#log.write("EVALUATING:"+str(currentBoard.getBoardArray()) + "\n")
 		value = evaluateBoard(currentBoard)
 		log.write("SKA : VALUE " + str(value) + "\n")
 		log.write("SKA : BOARD " + str(currentBoard.getBoardArray()) + "\n\n")
+		return value
 
 	#If player turn: set find max value and set alpha
 	elif (isMaximizingPlayer):
@@ -88,8 +92,7 @@ def alphabeta (curDepth, isMaximizingPlayer, branchFactor, currentBoard, alpha, 
 			if not prune:
 				log.write("If "+ playerName + " MOVES "+str(moveIndex + 1)+"\n")
 				log.write(playerName + " CHILD NO."+str(moveIndex +1)+" MM\n")
-				log.write("Its state will be: ")
-
+				#log.write("Its state will be: ")
 				if moveIsLegal(moveIndex,currentBoard,isMaximizingPlayer):
 					#Get board produced by this move from this node
 					#log.write("CHAOS ====================================== \n")
@@ -108,6 +111,7 @@ def alphabeta (curDepth, isMaximizingPlayer, branchFactor, currentBoard, alpha, 
 
 					#pass board to child
 					value = min(value, alphabeta(curDepth + 1, nextPlayerIsMax, branchFactor, nextBoard, alpha, beta))
+					log.write("BETA: " + str(value) + " MOVE INDEX " + str(moveIndex) + " DEPTH " +  str(curDepth) + " BOARD " + str(nextBoard.getBoardArray()) +"\n")
 					beta = min(value, beta)
 					if alpha >= beta:
 						prune = True

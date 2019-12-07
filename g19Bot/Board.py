@@ -54,9 +54,11 @@ class Board:
         return self.board.ravel()
 
     def gameOver(self):
-        x = self.board[0, :-1]
-        y = np.count_nonzero(x) == 0
-        return y
+        north = self.board[0, :-1]
+        south = self.board[1, :-1]
+        y = np.count_nonzero(north) == 0
+        z = np.count_nonzero(south) == 0
+        return y or z
     
     def getOppScore(self):
         return self.board[self.oppSide][self.holes]
