@@ -18,11 +18,11 @@ log = open('MANCALA_OUT.txt','w')
 def alphabeta (curDepth, isMaximizingPlayer, branchFactor,previousBoard, currentBoard,rootBoard, alpha, beta, extraTurns):
 	#global #log
 	global MAXDEPTH
-	
+
 	value = 0
 	log.write("\nD"+str(curDepth)+": ")
 
-	# base case : leafDepth (max depth) reached or Game Over 
+	# base case : leafDepth (max depth) reached or Game Over
 
 	if (curDepth == MAXDEPTH-2) or (currentBoard.gameOver()):
 		#log.write("EVALUATING:"+str(currentBoard.getBoardArray()) + "\n")
@@ -58,12 +58,12 @@ def alphabeta (curDepth, isMaximizingPlayer, branchFactor,previousBoard, current
 					nextBoard.setBoardArray(nextArray)
 					#log.write("CHAOS - EXITED" + str(nextBoard.getBoardArray()) + "\n")
 					#log.write("CHAOS ====================================== \n")
-					
+
 					#by default next turn is opp's (Min's)
 					nextPlayerIsMax = False
 					#unless it's a move that gives an extra turn to Max
 					if givesExtraTurn(moveIndex,copy.deepcopy(currentBoard), isMaximizingPlayer):
-						nextPlayerIsMax = True 
+						nextPlayerIsMax = True
 						extraTurns = extraTurns + 1
 
 					#pass board to child
@@ -78,7 +78,7 @@ def alphabeta (curDepth, isMaximizingPlayer, branchFactor,previousBoard, current
 					#log.write("ILLEGAL\n")
 					alpha = -9999
 
-	#if not player turn: find minimum value and set beta 
+	#if not player turn: find minimum value and set beta
 	else:
 		prune = False
 		value = 9999
@@ -107,7 +107,7 @@ def alphabeta (curDepth, isMaximizingPlayer, branchFactor,previousBoard, current
 					nextPlayerIsMax = True
 					#unless it's a move that gives an extra turn to Max
 					if givesExtraTurn(moveIndex,copy.deepcopy(currentBoard), isMaximizingPlayer):
-						nextPlayerIsMax = False 
+						nextPlayerIsMax = False
 						extraTurns = extraTurns + 1
 
 					#pass board to child
@@ -124,7 +124,7 @@ def alphabeta (curDepth, isMaximizingPlayer, branchFactor,previousBoard, current
 					#log.write("ILLEGAL\n")
 					beta = 9999
 	return value
-	
+
 
 def makeNextBoard(playerSide, currentBoard, moveIndex):
 	resBoard = currentBoard
@@ -152,7 +152,7 @@ def makeNextBoard(playerSide, currentBoard, moveIndex):
 		acrossIncrement = 8
 		skipSouth = True #must skip first pit when sowing
 		skipNorth = False
-		
+
 	#collect the seeds, emptying the pit
 	seedStash = resBoard[movePit]
 	resBoard[movePit] = 0
@@ -184,7 +184,7 @@ def makeNextBoard(playerSide, currentBoard, moveIndex):
 			resBoard[scorePit]+=1
 		#empty opp's pit
 		resBoard[curPit+acrossIncrement] = 0
-	
+
 	#log.write("CHAOS - MOVED " + str(resBoard) + "\n")
 	#log.write("-----------------------------------------------------\n")
 	return resBoard
@@ -195,11 +195,11 @@ def givesExtraTurn(moveIndex, currentBoard, fromMaxNode):
 	resBoard = currentBoard.getBoardArray()
 	NScorePit = 7
 	SScorePit = 15
-	if(fromMaxNode):	
+	if(fromMaxNode):
 		index = currentBoard.agentSide
-	else: 
+	else:
 		index = currentBoard.getOppSide()
-	
+
 	if (index == 1): #move is being made by South
 		movePit = moveIndex + 8
 		scorePit = 15
@@ -253,6 +253,54 @@ def evaluateBoard(previousBoard,board,rootBoard):
 	prevScoreSouth = resPrevBoard[15]
 	diffScoreSouth = scoreSouth - prevScoreSouth
 
+	resBoard = board.getBoardArray()
+	northScorePit= 7
+	southScorePit = 15
+
+
+
+	#get all indexes where we may attack is possible
+	southAttackIndexes = []
+	northAttackIndexes = []
+	for pitIndex in range(0,7):# [8,14] or [0,6]
+
+		if resBoard[pitIndex] == 0 and resBoard[pitIndex+8] != 0:
+			northAttackIndexes.append(pitIndex)
+
+		if resBoard[pitIndex+8] == 0 and resBoard[pitIndex] != 0:
+			southAttackIndexes.append(pitIndex+8)
+
+	#given all those attack points find move Pit indexes where an oppotunity to
+	#attack exists
+	northCaptures=0
+	southCaptures=0
+	for attackIndex in northAttackIndexes:
+		#for each move pit except it
+		for moveIndex in range(0,northScorePit+1):
+			if moveIndex == attackIndex:
+				break
+			if moveIndex < attackIndex:
+				northCaptures += (resBoard[moveIndex] == attackIndex - moveIndex)
+			if moveIndex > attackIndex:
+				northCaptures += (resBoard[moveIndex] == (15+attackIndex) - moveIndex)
+
+	for attackIndex in southAttackIndexes:
+		#for each move pit except it
+		for moveIndex in range(8,southScorePit+1):
+			if moveIndex == attackIndex:
+				break
+			if moveIndex > attackIndex:
+				southCaptures += (resBoard[moveIndex] == attackIndex - moveIndex)
+			if moveIndex < attackIndex:
+				southCaptures += (resBoard[moveIndex] == (15+attackIndex) - moveIndex)
+
+	if (board.agentSide == 0): #North
+		ourCaptures = northCaptures
+		oppCaptures = southCaptures
+	else: #South
+		ourCaptures = southCaptures
+		oppCaptures = northCaptures
+
 
 	if (board.agentSide == 1):
 		return (scoreSouth - scoreNorth) + 0.5*(seedsOnSouthSide - seedsOnNorthSide)
@@ -262,12 +310,12 @@ def evaluateBoard(previousBoard,board,rootBoard):
 def moveIsLegal(moveIndex,board,isMaxTurn):
 	#log.write("LEGAL CHECKING MOVE " + str(moveIndex) + " FOR MAX NODE " + str(isMaxTurn) + "\n")
 	#log.write("LEGAL CHECKING BOARD " + str(board.getBoardArray())
-					
+
 	if (isMaxTurn):
 		#log.write("LEGAL INDEX GOT " + str(board.getSeeds(board.agentSide, moveIndex)) + "\n")
 		return board.getSeeds(board.agentSide, moveIndex) != 0
 	#log.write("LEGAL INDEX GOT " + str(board.getSeeds(board.getOppSide(), moveIndex)) + "\n")
-	return board.getSeeds(board.getOppSide(), moveIndex) != 0 
+	return board.getSeeds(board.getOppSide(), moveIndex) != 0
 
 
 #-------------------------------Implementation----------------------------------
@@ -278,7 +326,7 @@ def run_alphabeta(initialBoard):
 	beta = 9999
 	moveIndex = move = 0
 	#prune = False
-	
+
 	#log.write("\n"+"STARTING ALPHABETA WITH MAX DEPTH: " + str(MAXDEPTH)+"\n")
 	#check available moves and their value
 	for moveIndex in range (0,branchFactor):
@@ -300,7 +348,7 @@ def run_alphabeta(initialBoard):
 			#log.write("CHAOS - EXITED" + str(nextBoard.getBoardArray()) + "\n")
 			#log.write("CHAOS ====================================== \n")
 			#by default next turn is opp's (Min's)
-			
+
 			nextPlayerIsMax = False
 			extraTurns = 0
 			#check for extra turn
@@ -312,7 +360,7 @@ def run_alphabeta(initialBoard):
 			value = max(value, alphabeta(0, nextPlayerIsMax, branchFactor,copy.deepcopy(initialBoard), copy.deepcopy(nextBoard),copy.deepcopy(initialBoard), alpha, beta, extraTurns))
 			#log.write("GRIMES MOVE : " + str(moveIndex) + " VALUE : " + str(value) + "\n")
 			#log.write("GRIMES BOARD : " + str(nextBoard.getBoardArray()) + "\n")
-			if maxValue < value: 
+			if maxValue < value:
 				maxValue = value
 				bestMove = moveIndex
 				bestBoard = nextBoard
