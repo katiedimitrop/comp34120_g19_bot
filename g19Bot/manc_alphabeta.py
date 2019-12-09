@@ -15,7 +15,7 @@ import copy
 
 MAXDEPTH = 8
 log = open('MANCALA_OUT.txt','w')
-def alphabeta (curDepth, isMaximizingPlayer, branchFactor,previousBoard, currentBoard, alpha, beta):
+def alphabeta (curDepth, isMaximizingPlayer, branchFactor,previousBoard, currentBoard,rootBoard, alpha, beta):
 	#global #log
 	global MAXDEPTH
 	
@@ -26,7 +26,7 @@ def alphabeta (curDepth, isMaximizingPlayer, branchFactor,previousBoard, current
 
 	if (curDepth == MAXDEPTH-2) or (currentBoard.gameOver()):
 		#log.write("EVALUATING:"+str(currentBoard.getBoardArray()) + "\n")
-		value = evaluateBoard(previousBoard,currentBoard)
+		value = evaluateBoard(previousBoard,currentBoard,rootBoard)
 		#log.write("SKA : VALUE " + str(value) + "\n")
 		#log.write("SKA : BOARD " + str(currentBoard.getBoardArray()) + "\n\n")
 		return value
@@ -61,11 +61,11 @@ def alphabeta (curDepth, isMaximizingPlayer, branchFactor,previousBoard, current
 					#by default next turn is opp's (Min's)
 					nextPlayerIsMax = False
 					#unless it's a move that gives an extra turn to Max
-					if givesExtraTurn(moveIndex,currentBoard, isMaximizingPlayer):
+					if givesExtraTurn(moveIndex,copy.deepcopy(currentBoard), isMaximizingPlayer):
 						nextPlayerIsMax = True 
 
 					#pass board to child
-					value = max(value, alphabeta(curDepth + 1, nextPlayerIsMax, branchFactor,copy.deepcopy(currentBoard), nextBoard, alpha, beta))
+					value = max(value, alphabeta(curDepth + 1, nextPlayerIsMax, branchFactor,copy.deepcopy(currentBoard), nextBoard, rootBoard, alpha, beta))
 					alpha = max(value, alpha)
 					if alpha >= beta:
 						#log.write("PRUNE\n")
@@ -104,11 +104,11 @@ def alphabeta (curDepth, isMaximizingPlayer, branchFactor,previousBoard, current
 					#by default next turn is agents (Max's)
 					nextPlayerIsMax = True
 					#unless it's a move that gives an extra turn to Max
-					if givesExtraTurn(moveIndex,currentBoard, isMaximizingPlayer):
+					if givesExtraTurn(moveIndex,copy.deepcopy(currentBoard), isMaximizingPlayer):
 						nextPlayerIsMax = False 
 
 					#pass board to child
-					value = min(value, alphabeta(curDepth + 1, nextPlayerIsMax, branchFactor,copy.deepcopy(currentBoard), nextBoard, alpha, beta))
+					value = min(value, alphabeta(curDepth + 1, nextPlayerIsMax, branchFactor,copy.deepcopy(currentBoard), nextBoard,rootBoard, alpha, beta))
 					#log.write("BETA: " + str(value) + " MOVE INDEX " + str(moveIndex) + " DEPTH " +  str(curDepth) + " BOARD " + str(nextBoard.getBoardArray()) +"\n")
 					beta = min(value, beta)
 					if alpha >= beta:
@@ -232,22 +232,32 @@ def givesExtraTurn(moveIndex, currentBoard, fromMaxNode):
 	return curPit == scorePit
 
 # evaluateBoard : works out the value of the board based on hueristic
-def evaluateBoard(previousBoard,board):
+def evaluateBoard(previousBoard,board,rootBoard):
 	#global #log
 	resBoard = board.getBoardArray()
+	resPrevBoard = rootBoard.getBoardArray()
+	log.write("phe: CURBOARD " + str(resBoard) + "\n")
+	log.write("phe: PREVBOARD " + str(resPrevBoard) + "\n")
 	#log.write("SKA: BOARD " + str(resBoard) + "\n")
 	seedsOnSouthSide = sum(resBoard[8:16])
 	seedsOnNorthSide = sum(resBoard[0:8])
 	scoreNorth = resBoard[7]
 	scoreSouth = resBoard[15]
+	prevScoreNorth = resPrevBoard[7]
+	diffScoreNorth = scoreNorth - prevScoreNorth
+	prevScoreSouth = resPrevBoard[15]
+	diffScoreSouth = scoreSouth - prevScoreSouth
+
+
 	if (board.agentSide == 1):
-		return (seedsOnSouthSide - seedsOnNorthSide) 
-	return (seedsOnNorthSide - seedsOnSouthSide)
+		return (diffScoreSouth - diffScoreNorth) + 2*(seedsOnSouthSide - seedsOnNorthSide)
+	return (diffScoreNorth - diffScoreSouth) + 2*(seedsOnNorthSide - seedsOnSouthSide)
 
 # moveIsLegal : True if legal, False if Illegal
 def moveIsLegal(moveIndex,board,isMaxTurn):
 	#log.write("LEGAL CHECKING MOVE " + str(moveIndex) + " FOR MAX NODE " + str(isMaxTurn) + "\n")
-	#log.write("LEGAL CHECKING BOARD " + str(board.getBoardArray()) + "\n")
+	#log.write("LEGAL CHECKING BOARD " + str(board.getBoardArray())
+					
 	if (isMaxTurn):
 		#log.write("LEGAL INDEX GOT " + str(board.getSeeds(board.agentSide, moveIndex)) + "\n")
 		return board.getSeeds(board.agentSide, moveIndex) != 0
@@ -292,7 +302,7 @@ def run_alphabeta(initialBoard):
 				nextPlayerIsMax = True
 
 			#log.write(str(nextBoard.getBoardArray()) + "\n")
-			value = max(value, alphabeta(0, nextPlayerIsMax, branchFactor,copy.deepcopy(initialBoard), copy.deepcopy(nextBoard), alpha, beta))
+			value = max(value, alphabeta(0, nextPlayerIsMax, branchFactor,copy.deepcopy(initialBoard), copy.deepcopy(nextBoard),copy.deepcopy(initialBoard), alpha, beta))
 			#log.write("GRIMES MOVE : " + str(moveIndex) + " VALUE : " + str(value) + "\n")
 			#log.write("GRIMES BOARD : " + str(nextBoard.getBoardArray()) + "\n")
 			if maxValue < value: 
