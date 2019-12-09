@@ -235,12 +235,14 @@ def givesExtraTurn(moveIndex, currentBoard, fromMaxNode):
 def evaluateBoard(previousBoard,board,rootBoard):
 	#global #log
 	resBoard = board.getBoardArray()
-	resPrevBoard = rootBoard.getBoardArray()
+	resPrevBoard = previousBoard.getBoardArray()
+	resRootBoard = rootBoard.getBoardArray()
 	log.write("phe: CURBOARD " + str(resBoard) + "\n")
 	log.write("phe: PREVBOARD " + str(resPrevBoard) + "\n")
+	log.write("phe: ROOTBOARD " + str(resRootBoard) + "\n")
 	#log.write("SKA: BOARD " + str(resBoard) + "\n")
-	seedsOnSouthSide = sum(resBoard[8:16])
-	seedsOnNorthSide = sum(resBoard[0:8])
+	seedsOnSouthSide = sum(resBoard[8:15])
+	seedsOnNorthSide = sum(resBoard[0:7])
 	scoreNorth = resBoard[7]
 	scoreSouth = resBoard[15]
 	prevScoreNorth = resPrevBoard[7]
@@ -250,8 +252,8 @@ def evaluateBoard(previousBoard,board,rootBoard):
 
 
 	if (board.agentSide == 1):
-		return (diffScoreSouth - diffScoreNorth) + 2*(seedsOnSouthSide - seedsOnNorthSide)
-	return (diffScoreNorth - diffScoreSouth) + 2*(seedsOnNorthSide - seedsOnSouthSide)
+		return (scoreSouth - scoreNorth) + 0.5*(seedsOnSouthSide - seedsOnNorthSide)
+	return (scoreNorth - scoreSouth) + 0.5*(seedsOnNorthSide - seedsOnSouthSide)
 
 # moveIsLegal : True if legal, False if Illegal
 def moveIsLegal(moveIndex,board,isMaxTurn):
