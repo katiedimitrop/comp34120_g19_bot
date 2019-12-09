@@ -15,7 +15,7 @@ import copy
 
 MAXDEPTH = 8
 log = open('MANCALA_OUT.txt','w')
-def alphabeta (curDepth, isMaximizingPlayer, branchFactor,previousBoard, currentBoard,rootBoard, alpha, beta):
+def alphabeta (curDepth, isMaximizingPlayer, branchFactor,previousBoard, currentBoard,rootBoard, alpha, beta, extraTurns):
 	#global #log
 	global MAXDEPTH
 	
@@ -29,6 +29,7 @@ def alphabeta (curDepth, isMaximizingPlayer, branchFactor,previousBoard, current
 		value = evaluateBoard(previousBoard,currentBoard,rootBoard)
 		#log.write("SKA : VALUE " + str(value) + "\n")
 		#log.write("SKA : BOARD " + str(currentBoard.getBoardArray()) + "\n\n")
+		log.write("EXTRATURNS " + str(extraTurns) + "\n")
 		return value
 
 	#If player turn: set find max value and set alpha
@@ -63,9 +64,10 @@ def alphabeta (curDepth, isMaximizingPlayer, branchFactor,previousBoard, current
 					#unless it's a move that gives an extra turn to Max
 					if givesExtraTurn(moveIndex,copy.deepcopy(currentBoard), isMaximizingPlayer):
 						nextPlayerIsMax = True 
+						extraTurns = extraTurns + 1
 
 					#pass board to child
-					value = max(value, alphabeta(curDepth + 1, nextPlayerIsMax, branchFactor,copy.deepcopy(currentBoard), nextBoard, rootBoard, alpha, beta))
+					value = max(value, alphabeta(curDepth + 1, nextPlayerIsMax, branchFactor,copy.deepcopy(currentBoard), nextBoard, rootBoard, alpha, beta, extraTurns))
 					alpha = max(value, alpha)
 					if alpha >= beta:
 						#log.write("PRUNE\n")
@@ -106,9 +108,10 @@ def alphabeta (curDepth, isMaximizingPlayer, branchFactor,previousBoard, current
 					#unless it's a move that gives an extra turn to Max
 					if givesExtraTurn(moveIndex,copy.deepcopy(currentBoard), isMaximizingPlayer):
 						nextPlayerIsMax = False 
+						extraTurns = extraTurns + 1
 
 					#pass board to child
-					value = min(value, alphabeta(curDepth + 1, nextPlayerIsMax, branchFactor,copy.deepcopy(currentBoard), nextBoard,rootBoard, alpha, beta))
+					value = min(value, alphabeta(curDepth + 1, nextPlayerIsMax, branchFactor,copy.deepcopy(currentBoard), nextBoard,rootBoard, alpha, beta, extraTurns))
 					#log.write("BETA: " + str(value) + " MOVE INDEX " + str(moveIndex) + " DEPTH " +  str(curDepth) + " BOARD " + str(nextBoard.getBoardArray()) +"\n")
 					beta = min(value, beta)
 					if alpha >= beta:
@@ -299,12 +302,14 @@ def run_alphabeta(initialBoard):
 			#by default next turn is opp's (Min's)
 			
 			nextPlayerIsMax = False
+			extraTurns = 0
 			#check for extra turn
 			if givesExtraTurn(moveIndex, copy.deepcopy(initialBoard), True):
 				nextPlayerIsMax = True
+				extraTurns=extraTurns+1
 
 			#log.write(str(nextBoard.getBoardArray()) + "\n")
-			value = max(value, alphabeta(0, nextPlayerIsMax, branchFactor,copy.deepcopy(initialBoard), copy.deepcopy(nextBoard),copy.deepcopy(initialBoard), alpha, beta))
+			value = max(value, alphabeta(0, nextPlayerIsMax, branchFactor,copy.deepcopy(initialBoard), copy.deepcopy(nextBoard),copy.deepcopy(initialBoard), alpha, beta, extraTurns))
 			#log.write("GRIMES MOVE : " + str(moveIndex) + " VALUE : " + str(value) + "\n")
 			#log.write("GRIMES BOARD : " + str(nextBoard.getBoardArray()) + "\n")
 			if maxValue < value: 

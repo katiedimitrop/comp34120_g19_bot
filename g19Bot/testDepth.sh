@@ -16,18 +16,14 @@ cat TEST.txt
 IFS=$'\n' read -d '' -r -a lines < TEST.txt
 lineNumber=0
 declare -a newList
-
 for x in ${lines[@]} 
 do 
-    #printf "line ${lineNumber}: %s\n" "${x}"
     let "lineNumber++"
     newList+=($x)
 done
-let "y=6*depth"
 for ((i = 1; i <= depth; i++))
 do
     let "x=i*7+(i-1)"
-    #echo "DEPTH \t" ${i}
     let "score1=${newList[x]}"
     let "score2=${newList[x+4]}"
     let "score3=(${score1}+${score2}) / 2 "
