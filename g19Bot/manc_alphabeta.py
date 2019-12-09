@@ -26,7 +26,7 @@ def alphabeta (curDepth, isMaximizingPlayer, branchFactor,previousBoard, current
 
 	if (curDepth == MAXDEPTH-2) or (currentBoard.gameOver()):
 		#log.write("EVALUATING:"+str(currentBoard.getBoardArray()) + "\n")
-		value = evaluateBoard(previousBoard,currentBoard,rootBoard)
+		value = evaluateBoard(previousBoard,currentBoard,rootBoard, extraTurns)
 		#log.write("SKA : VALUE " + str(value) + "\n")
 		#log.write("SKA : BOARD " + str(currentBoard.getBoardArray()) + "\n\n")
 		log.write("EXTRATURNS " + str(extraTurns) + "\n")
@@ -108,7 +108,7 @@ def alphabeta (curDepth, isMaximizingPlayer, branchFactor,previousBoard, current
 					#unless it's a move that gives an extra turn to Max
 					if givesExtraTurn(moveIndex,copy.deepcopy(currentBoard), isMaximizingPlayer):
 						nextPlayerIsMax = False
-						extraTurns = extraTurns + 1
+						#extraTurns = extraTurns + 1
 
 					#pass board to child
 					value = min(value, alphabeta(curDepth + 1, nextPlayerIsMax, branchFactor,copy.deepcopy(currentBoard), nextBoard,rootBoard, alpha, beta, extraTurns))
@@ -235,7 +235,7 @@ def givesExtraTurn(moveIndex, currentBoard, fromMaxNode):
 	return curPit == scorePit
 
 # evaluateBoard : works out the value of the board based on hueristic
-def evaluateBoard(previousBoard,board,rootBoard):
+def evaluateBoard(previousBoard,board,rootBoard, extraTurns):
 	#global #log
 	resBoard = board.getBoardArray()
 	resPrevBoard = previousBoard.getBoardArray()
@@ -303,8 +303,8 @@ def evaluateBoard(previousBoard,board,rootBoard):
 
 
 	if (board.agentSide == 1):
-		return (scoreSouth - scoreNorth) + 0.5*(seedsOnSouthSide - seedsOnNorthSide)
-	return (scoreNorth - scoreSouth) + 0.5*(seedsOnNorthSide - seedsOnSouthSide)
+		return 0.45*(scoreSouth - scoreNorth) + (0.05*ourCaptures)-(0.1*oppCaptures) + 0.1*extraTurns
+	return 0.45*(scoreNorth - scoreSouth) + (0.05*ourCaptures)-(0.1*oppCaptures) + 0.1*extraTurns
 
 # moveIsLegal : True if legal, False if Illegal
 def moveIsLegal(moveIndex,board,isMaxTurn):
