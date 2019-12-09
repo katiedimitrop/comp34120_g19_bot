@@ -1,6 +1,7 @@
 import message as msg
 import manc_alphabeta as ab
 import manc_minimax as mm
+from statistics import mean
 import sys
 from Board import *
 import time
@@ -12,6 +13,7 @@ parser.add_argument("-m", "--method", dest = "method", default = "AB", help="Sea
 args = parser.parse_args()
 moveNumber = 0
 oppMove = 0
+timeList = []
 
 def makeSwap():
     global board
@@ -20,6 +22,7 @@ def makeSwap():
 def makeMove(changeM):
     global board
     global moveNumber
+    global timeList
     moveNumber = moveNumber + 1
     seedNum = 0
     pitIndex = 7
@@ -69,7 +72,9 @@ def makeMove(changeM):
     if 'CHANGE' in changeM:
         #uncomment to try debugging
         if(args.method == "AB"):
+          startTime = time.time()
           bestPit = ab.run_ab(changeM,f,board, args.depth)
+          timeList.append(time.time() - startTime)
         else:
           bestPit = mm.run_mm(changeM, f, board.agentSide)
         #waiting here until result is available
@@ -150,6 +155,7 @@ def run_game():
 board = Board(7,7)
 swap_possible = False
 f = open('LOG.txt','w')
+ft = open('TEST.txt', 'a')
 run_game()
 f.write("MANCALA AGENT RUN WITH DEPTH : " + str(args.depth) + " METHOD: " + str(args.method) + "\n")
 f.write("FINAL BOARD : " + str(board.getBoard()) + "\n")
@@ -157,3 +163,13 @@ f.write("\t SCORE \t MOVES \n")
 f.write("US \t " + str(board.getAgentScore()) + " \t " + str(moveNumber) + "\n" )
 f.write("OPP \t " + str(board.getOppScore()) + " \t " + str(oppMove) + "\n" )
 f.close()
+
+if(board.agentSide == 1):
+  side = "SOUTH"
+else:
+  side = "NORTH"
+
+average = mean(timeList) * 1000
+finalScore = board.getAgentScore() - board.getOppScore()
+ft.write(str(args.depth) + "\t\t" + str(side) + "\t\t"  + str(round(average, 2)) + "\t\t" + str(finalScore) + "\n")
+ft.close()
