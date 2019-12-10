@@ -14,8 +14,13 @@ import numpy as np
 import copy
 
 MAXDEPTH = 8
+SCORE_W = 0.3
+SEEDS_W = 0.2
+OURCAPT_W = 0.2
+OPPCAPT_W = 0.2
+EXTRA_W = 0.1
 log = open('MANCALA_OUT.txt','w')
-def alphabeta (curDepth, isMaximizingPlayer, branchFactor,previousBoard, currentBoard,rootBoard, alpha, beta, extraTurns):
+def alphabeta (curDepth, isMaximizingPlayer, branchFactor, previousBoard, currentBoard, rootBoard, alpha, beta, extraTurns):
 	#global #log
 	global MAXDEPTH
 
@@ -303,8 +308,8 @@ def evaluateBoard(previousBoard,board,rootBoard, extraTurns):
 
 
 	if (board.agentSide == 1):
-		return 0.45*(scoreSouth - scoreNorth) + (0.05*ourCaptures)-(0.1*oppCaptures) + 0.1*extraTurns
-	return 0.45*(scoreNorth - scoreSouth) + (0.05*ourCaptures)-(0.1*oppCaptures) + 0.1*extraTurns
+		return (SCORE_W*(scoreSouth - scoreNorth)) + (SEEDS_W*(seedsOnSouthSide - seedsOnNorthSide)) + (OURCAPT_W*ourCaptures)-(OPPCAPT_W*oppCaptures) + (EXTRA_W*extraTurns)
+	return (SCORE_W*(scoreNorth - scoreSouth)) + (SEEDS_W*(seedsOnNorthSide - seedsOnSouthSide)) + (OURCAPT_W*ourCaptures)-(OPPCAPT_W*oppCaptures) + (EXTRA_W*extraTurns)
 
 # moveIsLegal : True if legal, False if Illegal
 def moveIsLegal(moveIndex,board,isMaxTurn):
