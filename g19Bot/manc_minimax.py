@@ -23,15 +23,10 @@ def minimax (curDepth, nodeIndex, isMaxTurn, scores, leafDepth, branchFactor
 
 	# base case : leafDepth (max depth) reached
 	if (curDepth == leafDepth):
-
 		#Leaves are the only node in which the board passed to them is evaluated
 		#and the score returned up
-
-
 		score = evaluateBoard(currentBoard)
-
 		scores[nodeIndex] = score
-
 		#return to parents
 		return score
 
@@ -237,32 +232,22 @@ def moveIsLegal(moveIndex,board,isMaxTurn):
 #-------------------------------Implementation----------------------------------
 def run_minimax(initialBoard,isMaxPlayer):
 	branchFactor = 7
-
 	maxTreeDepth = 5
-
 	totalNoOfLeaves = branchFactor ** maxTreeDepth
-
 	#Initialize tree leave evaluation holders
 	scores = [np.NaN]* totalNoOfLeaves
-
-
 	moveIndex = 0
 
 	#DEBUG:
 	maxTreeDepthCheck = math.log(len(scores), branchFactor)
-
-
 	startDepth = 0
 	firstIndex = 0
-
 	#South is maximising player, set to 1 to run as North
-
 	origBoard = initialBoard
 	#minimax must start from top of tree (0)
 	#First and only index at D0 is 0
 	mmResult = minimax(startDepth, firstIndex, isMaxPlayer, scores, maxTreeDepth
 					,branchFactor, initialBoard, moveIndex)
-
 
 	testmyboard = makeNextBoard(True, origBoard, bestMove)
 	return bestMove
@@ -273,5 +258,3 @@ def run_mm(changeM,isPlayerSouth):
 	state = [int(word) for word in state]
 	return run_minimax(state,isPlayerSouth)
 
-
-#run_minimax()

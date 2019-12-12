@@ -19,7 +19,6 @@ class Board:
     def toString(self):
         print(self.board)
 
-    #This is the number of holes per player (excluding scorepit)
     def getHoles(self):
         return self.holes
 
